@@ -1,0 +1,77 @@
+version: '3.5'
+
+services:
+  visual-mysql:
+    container_name: face-search-server-mysql
+    image: mysql/mysql-server:5.7
+    environment:
+      MYSQL_DATABASE: visual_face_search
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_ROOT_HOST: '%'
+      TZ: Asia/Shanghai
+    expose:
+      - "3306"
+## 若需要远程访问mysql，请打开下面的配置 ##
+#    ports:
+#      - "3306:3306"
+    command: --character-set-server=utf8mb4 --collation-server=utf8mb4_unicode_ci
+    volumes:
+      - ${FACESEARCH_VOLUME_DIRECTORY:-.}/volumes-face-search/mysql:/var/lib/mysql
+    restart: always
+
+  visual-opensearch:
+    container_name: face-search-opensearch-standalone
+    image: opensearchproject/opensearch:2.4.0
+    environment:
+      discovery.type: single-node
+    expose:
+      - "9200"
+      - "9600"
+## 若需要远程访问opensearch，请打开下面的配置 ##
+#    ports:
+#      - "9200:9200"
+#      - "9600:9600"
+    volumes:
+      - ${FACESEARCH_VOLUME_DIRECTORY:-.}/volumes-face-search/opensearch/data:/usr/share/opensearch/data
+    restart: always
+
+  visual-opensearch-dashboards:
+    container_name: face-search-opensearch-dashboards
+    image: opensearchproject/opensearch-dashboards:2.4.0
+    environment:
+      OPENSEARCH_HOSTS: '["https://visual-opensearch:9200"]'
+    ports:
+      - "5601:5601"
+    depends_on:
+      - "visual-opensearch"
+    restart: always
+
+  visual-facesearch:
+    container_name: face-search-server-standalone
+    image: divenswu/face-search:2.0.1
+    environment:
+      SPRING_DATASOURCE_URL: 'jdbc:mysql://visual-mysql:3306/visual_face_search?useUnicode=true&characterEncoding=utf8'
+      SPRING_DATASOURCE_USERNAME: root
+      SPRING_DATASOURCE_PASSWORD: root
+      VISUAL_ENGINE_OPENSEARCH_HOST: visual-opensearch
+      VISUAL_ENGINE_OPENSEARCH_PORT: 9200
+      VISUAL_SWAGGER_ENABLE: 'true'
+      JAVA_OPTS: '-XX:MaxDirectMemorySize=400M -Xmx1536m -Xms1536m'     #线上环境自行修改#
+    volumes:
+      - ${FACESEARCH_VOLUME_DIRECTORY:-.}/volumes-face-search/search/logs:/app/face-search/logs
+    ports:
+      - "56789:8080"
+    deploy:
+      resources:
+        limits:
+          memory: 2G  #线上环境自行修改#
+        reservations:
+          memory: 1G  #线上环境自行修改#
+    depends_on:
+      - "visual-mysql"
+      - "visual-opensearch"
+    restart: always
+
+networks:
+  default:
+    name: facesearch-opensearch

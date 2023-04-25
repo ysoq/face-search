@@ -1,0 +1,133 @@
+# 开发环境配置
+server:
+  # 服务器的HTTP端口，默认为80
+  port: 8080
+  servlet:
+    # 应用的访问路径
+    context-path: /
+  tomcat:
+    # tomcat的URI编码
+    uri-encoding: UTF-8
+    # tomcat最大线程数，默认为200
+    max-threads: 80
+    # Tomcat启动初始化的线程数，默认值25
+    min-spare-threads: 30
+ 
+# 日志配置
+logging:
+  level:
+    com.visual.face.search: info
+    org.springframework: warn
+
+# 模型配置
+visual:
+  model:
+    faceDetection:
+      name: ${VISUAL_MODEL_FACEDETECTION_NAME:InsightScrfdFaceDetection}
+      modelPath: ${VISUAL_MODEL_FACEDETECTION_PATH:}
+      thread: ${VISUAL_MODEL_FACEDETECTION_THREAD:4}
+      backup:
+        name: ${VISUAL_MODEL_FACEDETECTION_BACKUP_NAME:PcnNetworkFaceDetection}
+        modelPath: ${VISUAL_MODEL_FACEDETECTION_BACKUP_PATH:}
+        thread: ${VISUAL_MODEL_FACEDETECTION_BACKUP_THREAD:4}
+    faceKeyPoint:
+      name: ${VISUAL_MODEL_FACEKEYPOINT_NAME:InsightCoordFaceKeyPoint}
+      modelPath: ${VISUAL_MODEL_FACEKEYPOINT_PATH:}
+      thread: ${VISUAL_MODEL_FACEKEYPOINT_THREAD:4}
+    faceAlignment:
+      name: ${VISUAL_MODEL_FACEALIGNMENT_NAME:Simple005pFaceAlignment}
+      modelPath: ${VISUAL_MODEL_FACEALIGNMENT_PATH:}
+      thread: ${VISUAL_MODEL_FACEALIGNMENT_THREAD:4}
+    faceRecognition:
+      name: ${VISUAL_MODEL_FACERECOGNITION_NAME:InsightArcFaceRecognition}
+      modelPath: ${VISUAL_MODEL_FACERECOGNITION_PATH:}
+      thread: ${VISUAL_MODEL_FACERECOGNITION_THREAD:4}
+    faceAttribute:
+      name: ${VISUAL_MODEL_FACEATTRIBUTE_NAME:InsightAttributeDetection}
+      modelPath: ${VISUAL_MODEL_FACEATTRIBUTE_PATH:}
+      thread: ${VISUAL_MODEL_FACEATTRIBUTE_THREAD:4}
+  engine:
+    open-search:
+      host: ${VISUAL_ENGINE_OPENSEARCH_HOST}
+      port: ${VISUAL_ENGINE_OPENSEARCH_PORT:9200}
+      scheme: ${VISUAL_ENGINE_OPENSEARCH_SCHEME:https}
+      username: ${VISUAL_ENGINE_OPENSEARCH_USERNAME:admin}
+      password: ${VISUAL_ENGINE_OPENSEARCH_PASSWORD:admin}
+  scheduler:
+    flush:
+      enable: true
+      interval: 60000
+  face-mask:
+    face-search: false
+    face-compare: false
+  swagger:
+    enable: ${VISUAL_SWAGGER_ENABLE:true}
+
+# Spring配置
+spring:
+  jackson:
+    time-zone: GMT+8
+    date-format: yyyy-MM-dd HH:mm:ss
+  # 文件上传
+  servlet:
+     multipart:
+       # 单个文件大小
+       max-file-size:  10MB
+       # 设置总上传的文件大小
+       max-request-size:  20MB
+  #数据源
+  datasource:
+    type: com.alibaba.druid.pool.DruidDataSource
+    driverClassName: com.mysql.cj.jdbc.Driver
+    druid:
+      # 主库数据源
+      master:
+        url: ${SPRING_DATASOURCE_URL}
+        username: ${SPRING_DATASOURCE_USERNAME:root}
+        password: ${SPRING_DATASOURCE_PASSWORD:root}
+      slave:
+        # 从数据源开关/默认关闭
+        enabled: false
+        url:
+        username:
+        password:
+      # 初始连接数
+      initialSize: 5
+      # 最小连接池数量
+      minIdle: 10
+      # 最大连接池数量
+      maxActive: 20
+      # 配置获取连接等待超时的时间
+      maxWait: 60000
+      # 配置间隔多久才进行一次检测，检测需要关闭的空闲连接，单位是毫秒
+      timeBetweenEvictionRunsMillis: 60000
+      # 配置一个连接在池中最小生存的时间，单位是毫秒
+      minEvictableIdleTimeMillis: 300000
+      # 配置一个连接在池中最大生存的时间，单位是毫秒
+      maxEvictableIdleTimeMillis: 900000
+      # 配置检测连接是否有效
+      validationQuery: SELECT 1 FROM DUAL
+      testWhileIdle: true
+      testOnBorrow: false
+      testOnReturn: false
+      webStatFilter:
+        enabled: true
+      statViewServlet:
+        enabled: true
+        # 设置白名单，不填则允许所有访问
+        allow:
+        url-pattern: /druid/*
+        # 控制台管理用户名和密码
+        login-username:
+        login-password:
+      filter:
+        stat:
+          enabled: true
+          # 慢SQL记录
+          log-slow-sql: true
+          slow-sql-millis: 1000
+          merge-sql: true
+        wall:
+          config:
+            multi-statement-allow: true
+

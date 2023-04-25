@@ -1,0 +1,132 @@
+# 开发环境配置
+server:
+  # 服务器的HTTP端口，默认为80
+  port: 8080
+  servlet:
+    # 应用的访问路径
+    context-path: /
+  tomcat:
+    # tomcat的URI编码
+    uri-encoding: UTF-8
+    # tomcat最大线程数，默认为200
+    max-threads: 10
+    # Tomcat启动初始化的线程数，默认值25
+    min-spare-threads: 5
+ 
+# 日志配置
+logging:
+  level:
+    com.visual.face.search: info
+    org.springframework: warn
+
+# 模型配置
+visual:
+  model:
+    faceDetection:
+      name: InsightScrfdFaceDetection
+      modelPath:
+      thread: 1
+      backup:
+        name: PcnNetworkFaceDetection
+        modelPath:
+        thread: 1
+    faceKeyPoint:
+      name: InsightCoordFaceKeyPoint
+      modelPath:
+      thread: 1
+    faceAlignment:
+      name: Simple005pFaceAlignment
+      modelPath:
+      thread: 1
+    faceRecognition:
+      name: InsightArcFaceRecognition
+      modelPath:
+      thread: 1
+    faceAttribute:
+      name: InsightAttributeDetection
+      modelPath:
+      thread: 1
+  engine:
+    open-search:
+      host: 172.16.36.229
+      port: 9200
+      scheme: https
+      username: admin
+      password: admin
+  scheduler:
+    flush:
+      enable: true
+      interval: 60000
+  face-mask:
+    face-search: false
+    face-compare: false
+  swagger:
+    enable: true
+
+# Spring配置
+spring:
+  jackson:
+    time-zone: GMT+8
+    date-format: yyyy-MM-dd HH:mm:ss
+  # 文件上传
+  servlet:
+     multipart:
+       # 单个文件大小
+       max-file-size:  10MB
+       # 设置总上传的文件大小
+       max-request-size:  20MB
+  #数据源
+  datasource:
+    type: com.alibaba.druid.pool.DruidDataSource
+    driverClassName: com.mysql.cj.jdbc.Driver
+    druid:
+      # 主库数据源
+      master:
+        url: jdbc:mysql://172.16.36.228:3306/visual_face_search?useUnicode=true&characterEncoding=utf8&zeroDateTimeBehavior=convertToNull&useSSL=false&serverTimezone=GMT%2B8
+        username: visual
+        password: visual
+      slave:
+        # 从数据源开关/默认关闭
+        enabled: false
+        url:
+        username:
+        password:
+      # 初始连接数
+      initialSize: 5
+      # 最小连接池数量
+      minIdle: 10
+      # 最大连接池数量
+      maxActive: 20
+      # 配置获取连接等待超时的时间
+      maxWait: 60000
+      # 配置间隔多久才进行一次检测，检测需要关闭的空闲连接，单位是毫秒
+      timeBetweenEvictionRunsMillis: 60000
+      # 配置一个连接在池中最小生存的时间，单位是毫秒
+      minEvictableIdleTimeMillis: 300000
+      # 配置一个连接在池中最大生存的时间，单位是毫秒
+      maxEvictableIdleTimeMillis: 900000
+      # 配置检测连接是否有效
+      validationQuery: SELECT 1 FROM DUAL
+      testWhileIdle: true
+      testOnBorrow: false
+      testOnReturn: false
+      webStatFilter:
+        enabled: true
+      statViewServlet:
+        enabled: true
+        # 设置白名单，不填则允许所有访问
+        allow:
+        url-pattern: /druid/*
+        # 控制台管理用户名和密码
+        login-username:
+        login-password:
+      filter:
+        stat:
+          enabled: true
+          # 慢SQL记录
+          log-slow-sql: true
+          slow-sql-millis: 1000
+          merge-sql: true
+        wall:
+          config:
+            multi-statement-allow: true
